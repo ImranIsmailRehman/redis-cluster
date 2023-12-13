@@ -23,9 +23,9 @@ The setup includes multiple Redis instances forming a cluster and a Twemproxy in
 
 1. **Clone the Repository**:
 
-  git@github.com:ImranIsmailRehman/redis-cluster.git
+    git@github.com:ImranIsmailRehman/redis-cluster.git
   
-  cd redis-cluster
+    cd redis-cluster
 
 2. **Build and Start Services**:
 
