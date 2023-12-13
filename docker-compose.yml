@@ -34,14 +34,18 @@ services:
       app_net:
         ipv4_address: 172.18.0.4
 
-  haproxy:
-    image: haproxy:latest
+  twemproxy:
+    build:
+      context: .
+      dockerfile: Dockerfile
     volumes:
-      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+      - ./nutcracker.yml:/etc/nutcracker.yml
     ports:
       - "6379:6379"
     depends_on:
-      - redis-cluster-init
+      - redis1
+      - redis2
+      - redis3
     networks:
       - app_net
 

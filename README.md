@@ -1,2 +1,0 @@
-# redis-cluster
-Redis Cluster
