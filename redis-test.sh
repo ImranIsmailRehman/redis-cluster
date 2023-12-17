@@ -2,7 +2,7 @@
 # Simple script to test writing and reading a key in Redis
 
 # Host and port of the HAProxy
-HOST="twemproxy"
+HOST="haproxy"
 PORT="6379"
 
 # Function to check connectivity

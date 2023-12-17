@@ -1,81 +1,57 @@
 version: '3'
 
 services:
-  redis1:
+  redis-master:
     image: redis:6.0.9
     ports:
       - "6000:6379"
     volumes:
-      - ./redis-cluster.conf:/usr/local/etc/redis/redis.conf
-    command: redis-server /usr/local/etc/redis/redis.conf
+      - ./redis-master.conf:/usr/local/etc/redis/redis.conf
     networks:
-      app_net:
-        ipv4_address: 172.18.0.2
+      - redis-network
 
-  redis2:
+  redis-slave:
     image: redis:6.0.9
     ports:
       - "6001:6379"
     volumes:
-      - ./redis-cluster.conf:/usr/local/etc/redis/redis.conf
-    command: redis-server /usr/local/etc/redis/redis.conf
+      - ./redis-slave.conf:/usr/local/etc/redis/redis.conf
     networks:
-      app_net:
-        ipv4_address: 172.18.0.3
+      - redis-network
+    depends_on:
+      - redis-master
 
-  redis3:
+  sentinel:
     image: redis:6.0.9
+    command: redis-sentinel /usr/local/etc/redis/sentinel.conf
+    volumes:
+      - ./sentinel.conf:/usr/local/etc/redis/sentinel.conf
     ports:
-      - "6002:6379"
-    volumes:
-      - ./redis-cluster.conf:/usr/local/etc/redis/redis.conf
-    command: redis-server /usr/local/etc/redis/redis.conf
+      - "26379:26379"
     networks:
-      app_net:
-        ipv4_address: 172.18.0.4
+      - redis-network
+    depends_on:
+      - redis-master
 
-  twemproxy:
-    build:
-      context: .
-      dockerfile: Dockerfile
+  haproxy:
+    image: haproxy:latest
     volumes:
-      - ./nutcracker.yml:/etc/nutcracker.yml
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
     ports:
       - "6379:6379"
-    depends_on:
-      - redis1
-      - redis2
-      - redis3
     networks:
-      - app_net
+      - redis-network
 
-  redis-cluster-init:
+  redis-test:
     image: redis:6.0.9
     depends_on:
-      - redis1
-      - redis2
-      - redis3
+      - haproxy
     volumes:
-      - ./redis-test.sh:/redis-test.sh 
+      - ./redis-test.sh:/redis-test.sh
+    entrypoint: ["/bin/bash", "/redis-test.sh"]
     networks:
-      - app_net
-    entrypoint: >
-      /bin/sh -c "
-      sleep 10;
-      redis-cli --cluster create 172.18.0.2:6379 172.18.0.3:6379 172.18.0.4:6379 --cluster-replicas 0 --cluster-yes;
-      while ! redis-cli -h 172.18.0.2 -p 6379 CLUSTER INFO | grep -q 'cluster_state:ok'; do
-        echo 'Waiting for the cluster to be ready...';
-        sleep 5;
-      done;
-      echo 'Redis cluster is ready.';
-       echo 'Cluster initialization complete. Running test script...';
-      /redis-test.sh;  # Execute the test script
-      "
-    
+      - redis-network
 
 networks:
-  app_net:
+  redis-network:
     driver: bridge
-    ipam:
-      config:
-        - subnet: 172.18.0.0/24
