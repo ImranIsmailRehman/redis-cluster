@@ -1,10 +1,10 @@
-# Redis Cluster with Twemproxy
+# Redis Setup with HAProxy
 
-This project sets up a Redis Cluster with Twemproxy (nutcracker) for connection management and load balancing. Twemproxy simplifies the client-side handling by proxying Redis commands to the appropriate cluster node.
+This project sets up a high-availability Redis environment using Redis, Redis Sentinel, and HAProxy. HAProxy is used for routing traffic to the current Redis master node, managed by Redis Sentinel for failover and high availability.
 
 ## Overview
 
-The setup includes multiple Redis instances forming a cluster and a Twemproxy instance that routes requests to these Redis nodes. The configuration is managed through Docker and Docker Compose for easy setup and scalability.
+The setup includes a Redis master-slave configuration with Sentinel for failover management and HAProxy for connection routing. Docker and Docker Compose are used for easy setup and management.
 
 ## Prerequisites
 
@@ -14,10 +14,10 @@ The setup includes multiple Redis instances forming a cluster and a Twemproxy in
 
 ## Components
 
-- `redis1`, `redis2`, `redis3`: Redis nodes that form the cluster.
-- `twemproxy`: Twemproxy instance for proxying requests to the Redis cluster.
-- `redis-cluster-init`: Initialization container to set up the Redis cluster.
-- `redis-test.js`: A Node.js script to test the connectivity and basic operations of the Redis cluster through Twemproxy.
+- `redis-master`, `redis-slave`: Redis master and slave instances.
+- `sentinel`: Redis Sentinel instances for monitoring Redis nodes and handling failover.
+- `haproxy`: HAProxy instance for routing client requests to the Redis master node.
+- `redis-test`: A containerized environment to run the test script.
 
 ## Setup and Running
 
@@ -33,20 +33,22 @@ docker-compose up -d
 
 
 3. **Running the Test Script**:
-After the services are up and running, execute the test script:
 
+After the services are up and running, Docker Compose will automatically execute the test script in the `redis-test` service.
 
 ## Configuration
 
 - Docker Compose configuration is located in `docker-compose.yml`.
-- Redis configuration templates for each node are in the `./docker-data/` directory.
-- Twemproxy configuration is in `nutcracker.yml`.
-- The test script `redis-test.js` is used to validate the setup.
+- Redis configuration for the master and slave are in `redis-master.conf` and `redis-slave.conf`.
+- Sentinel configuration is in `sentinel.conf`.
+- HAProxy configuration is in `haproxy.cfg`.
+- The test script `redis-test.sh` is used to validate the setup.
 
 ## Notes
 
-- Twemproxy does not support all Redis commands (e.g., `INFO`). The test script avoids using these commands.
-- Direct connections to Redis nodes are recommended for commands not supported by Twemproxy.
+- HAProxy is configured to route traffic to the Redis master node. It performs health checks to ensure it connects to the master.
+- Redis Sentinel manages the failover process, automatically promoting a slave to master if the current master fails.
+- The test script `redis-test.sh` checks the basic connectivity and functionality of the Redis setup through HAProxy.
 
 ## Contributing
 
