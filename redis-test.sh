@@ -3,7 +3,7 @@
 
 # Host and port of the HAProxy
 HOST="haproxy"
-PORT="6379"
+PORT="7111"
 
 # Function to check connectivity
 check_redis() {

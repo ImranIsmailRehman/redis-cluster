@@ -2,7 +2,7 @@ const Redis = require('ioredis');
 
 // Twemproxy (nutcracker) connection details
 const TWEMPROXY_IP = 'localhost'; // Replace with your Twemproxy IP
-const TWEMPROXY_PORT = 6379; // Replace with your Twemproxy port if different
+const TWEMPROXY_PORT = 7111; // Replace with your Twemproxy port if different
 
 const redis = new Redis({
     host: TWEMPROXY_IP,
