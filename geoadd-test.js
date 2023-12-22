@@ -1,7 +1,7 @@
 const Redis = require('ioredis');
 
 // HAProxy endpoint
-const haproxyEndpoint = { host: 'localhost', port: 6379 };
+const haproxyEndpoint = { host: 'localhost', port: 7111 };
 
 const redis = new Redis(haproxyEndpoint);
 
